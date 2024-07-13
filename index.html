@@ -29,15 +29,15 @@
         <div><p>KWH</p></div>
 
         <div>   <p>Kapasitas</p></div>
-        <div>  <p>...</p></div>
+        <div>  <p >...</p></div>
         <div><p>AH</p></div>
 
         <div>   <p>Biaya Listrik</p></div>
         <div>  <p>Rp</p></div>
-        <div><p id="data3" >...</p></div>
+        <div><p  >...</p></div>
 
         <div>   <p>Debit Air</p></div>
-        <div>  <p>...</p></div>
+        <div>  <p id="data3">...</p></div>
         <div><p>M/l</p></div>
     </div>
   
@@ -69,8 +69,36 @@
 <script src="https://code.highcharts.com/highcharts-more.js"></script>
 <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="db.js"></script>
 
 <script >
+
+
+
+  var config = {
+    apiKey: "AIzaSyCee89Eeo_nCBTMlwRXlH3SKwOm9mYotvU",
+    authDomain: "iot-hidroponic.firebaseapp.com",
+    databaseURL: "https://iot-hidroponic-default-rtdb.firebaseio.com",
+    projectId: "iot-hidroponic",
+   
+  };
+
+firebase.initializeApp(config);
+var db = firebase.database();
+data_terima1 = db.ref('data/data_terima1');
+data_terima2 = db.ref('data/data_terima2');
+data_terima3 = db.ref('data/data_terima3');
+
+data_terima1.on("value", function(snapshot) {
+    document.getElementById('data1').innerHTML=snapshot.val();});
+data_terima2.on("value", function(snapshot) {
+    document.getElementById('data2').innerHTML=snapshot.val();});
+data_terima3.on("value", function(snapshot) {
+    document.getElementById('data3').innerHTML=snapshot.val();});
+
+
+
+
 
     // Create the chart
 Highcharts.stockChart('container', {
@@ -85,10 +113,11 @@ Highcharts.stockChart('container', {
                 // set up the updating of the chart each second
                 const series = this.series[0];
                 setInterval(function () {
+                    data_terima1.on("value", function(snapshot) {
                     const x = (new Date()).getTime(), // current time
-                        y = Math.round(Math.random() * 100);
-                        document.getElementById('data1').innerHTML =y;
+                    y= snapshot.val()
                     series.addPoint([x, y], true, true);
+                });
                 }, 1000);
             }
         }
@@ -136,8 +165,9 @@ Highcharts.stockChart('container', {
 
             for (let i = -999; i <= 0; i += 1) {
                 data.push([
-                    time + i * 1000,
-                    Math.round(Math.random() * 100)
+                    time + i * 1000,0
+                   // Math.round(Math.random() * 100)
+                
                 ]);
             }
             return data;
@@ -154,12 +184,12 @@ Highcharts.stockChart('container2', {
                 // set up the updating of the chart each second
                 const series = this.series[0];
                 setInterval(function () {
+                    data_terima2.on("value", function(snapshot) {
                     const x = (new Date()).getTime(), // current time
-                        y = Math.round(Math.random() * 100);
-                        document.getElementById('data2').innerHTML =y;
-                        document.getElementById('data3').innerHTML =y*100;
-                    series.addPoint([x, y], true, true);
-                }, 1000);
+                    y= snapshot.val()
+                series.addPoint([x, y], true, true);
+            });
+            },1000);
             }
         }
     },
@@ -203,15 +233,24 @@ Highcharts.stockChart('container2', {
             // generate an array of random data
             const data = [],
                 time = (new Date()).getTime();
-
+            
             for (let i = -999; i <= 0; i += 1) {
+               
+                
+               
                 data.push([
                     time + i * 1000,
-                    Math.round(Math.random() * 100)
+                    0
+                   // Math.round(Math.random() * 100)
+                  
                 ]);
+           
             }
             return data;
-        }())
+        }
+        
+        
+        ())
     }]
 });
 /*
