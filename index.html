@@ -11,8 +11,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
-
 </head>
+
 <body>
 
 <div class="header" >
@@ -21,47 +21,50 @@
 <div class="cover">
    
     <div class="grid-container">
+ 
         <div> <p>Daya Listrik</p>  </div>
-        <div>  <p id="data1" >...</p></div>
+        <div>  <p  id="data_daya">...</p></div>
         <div><p>Watt</p></div>
+
         <div>  <p>Penggunaan Listrik</p></div>
-        <div>  <p id="data2">...</p></div>
+        <div>  <p id="data_konsumsi_daya">...</p></div>
         <div><p>KWH</p></div>
 
-        <div>   <p>Kapasitas</p></div>
-        <div>  <p >...</p></div>
+        <div>  <p>Kapasitas</p></div>
+        <div>  <p id="data_kapasitas">...</p></div>
         <div><p>AH</p></div>
 
         <div>   <p>Biaya Listrik</p></div>
-        <div>  <p>Rp</p></div>
-        <div><p  >...</p></div>
+        <div>  <p >Rp</p></div>
+        <div><p  id ="data_biaya_listrik">...</p></div>
 
         <div>   <p>Debit Air</p></div>
-        <div>  <p id="data3">...</p></div>
+        <div>  <p id="data_debit_air">...</p></div>
         <div><p>M/l</p></div>
+
+        <div>   <p>Relay</p></div>
+        <div><p id="out_relay">...</p></div>
+        <div>  <p id="data_relay" style="display: none;">...</p></div>
+        
+
     </div>
   
 <div  id="container"  style="height: 300px;padding: 10px;"></div>
-
 <div id="container2" style="height: 300px;padding: 10px"></div>
-   
 <div class="center">
    
      <div class="containerb">
    
         
         <label for="cb" class="lb"><i class="fas fa-power-off pl"></i></label>
-        <input type="checkbox" id="cb" onclick=" myFunction()" class="cb"/>
-        <div   id="myDIV">  OFF</div>
+        <input type="checkbox" id="cb" onclick=" tombol_relay()" class="cb"/>
+        <div style="display: none;"   id="myDIV">  OFF</div>
     
   </div>
 
 </div>
 
-  <div class="footer" style="margin-top: 5px;">
-    <p>Tugas Akhir An Muhhamad</p>
-  </div>
-</div> 
+  
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
@@ -85,16 +88,45 @@
 
 firebase.initializeApp(config);
 var db = firebase.database();
-data_terima1 = db.ref('data/data_terima1');
-data_terima2 = db.ref('data/data_terima2');
-data_terima3 = db.ref('data/data_terima3');
 
-data_terima1.on("value", function(snapshot) {
-    document.getElementById('data1').innerHTML=snapshot.val();});
-data_terima2.on("value", function(snapshot) {
-    document.getElementById('data2').innerHTML=snapshot.val();});
-data_terima3.on("value", function(snapshot) {
-    document.getElementById('data3').innerHTML=snapshot.val();});
+data_daya          = db.ref('daya');
+data_biaya_listrik = db.ref('biaya_listrik');
+data_debit_air     = db.ref('debit_air');
+data_kapasitas     = db.ref('kapasitas');
+data_konsumsi_daya = db.ref('konsumsi_daya');
+data_ph_air        = db.ref('ph_air');
+data_relay         = db.ref('relay');
+
+
+
+data_daya.on("value", function(snapshot) { document.getElementById('data_daya').innerHTML=snapshot.val();});
+data_biaya_listrik.on("value", function(snapshot) { document.getElementById('data_biaya_listrik').innerHTML=snapshot.val();});
+data_debit_air.on("value", function(snapshot) { document.getElementById('data_debit_air').innerHTML=snapshot.val();})
+data_kapasitas.on("value", function(snapshot) { document.getElementById('data_kapasitas').innerHTML=snapshot.val();});
+data_konsumsi_daya.on("value", function(snapshot) { document.getElementById('data_konsumsi_daya').innerHTML=snapshot.val();});
+data_relay.on("value", function(snapshot) {
+     document.getElementById('data_relay').innerHTML=snapshot.val();
+     if (snapshot.val()> 0){
+        document.getElementById('out_relay').innerHTML = "aktif";
+     }else {
+        document.getElementById('out_relay').innerHTML = "non aktif";
+
+     }
+    
+    });
+
+
+
+function tombol_relay() {
+  var x = document.getElementById("myDIV");
+  if (x.innerHTML === "OFF") {
+    x.innerHTML = "ON";
+    db.ref("relay").set("1");
+  } else {
+    x.innerHTML = "OFF";
+    db.ref("relay").set("0");
+  }
+}
 
 
 
@@ -113,10 +145,10 @@ Highcharts.stockChart('container', {
                 // set up the updating of the chart each second
                 const series = this.series[0];
                 setInterval(function () {
-                    data_terima1.on("value", function(snapshot) {
-                    const x = (new Date()).getTime(), // current time
-                    y= snapshot.val()
-                    series.addPoint([x, y], true, true);
+                        data_daya.on("value", function(snapshot) {
+                        const x = (new Date()).getTime(), // current time
+                        y= snapshot.val()
+                        series.addPoint([x, y], true, true);
                 });
                 }, 1000);
             }
@@ -184,7 +216,7 @@ Highcharts.stockChart('container2', {
                 // set up the updating of the chart each second
                 const series = this.series[0];
                 setInterval(function () {
-                    data_terima2.on("value", function(snapshot) {
+                    data_ph_air.on("value", function(snapshot) {
                     const x = (new Date()).getTime(), // current time
                     y= snapshot.val()
                 series.addPoint([x, y], true, true);
@@ -413,16 +445,7 @@ setInterval(function () {
     }
 }, 2000);
 */
-function myFunction() {
-  var x = document.getElementById("myDIV");
-  if (x.innerHTML === "OFF") {
-    x.innerHTML = "ON";
-    //db.ref("/parif/rl").set("1");
-  } else {
-    x.innerHTML = "OFF";
-   // db.ref("/parif/rl").set("0");
-  }
-}
+
 
 </script>
 </body>
